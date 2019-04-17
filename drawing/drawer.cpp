@@ -90,57 +90,83 @@ void Drawer::scan_line(float_mat * p0, float_mat * p1, float_mat * p2) {
     if(p1[1] == p2[1] and p1[0] > p2[0])
         std::swap(p1, p2);
 
-    float_mat y0 = p0[1];
-    float_mat y1 = p1[1];
-    float_mat y2 = p2[1];
+    int yb = (int) std::round(p0[1]), ym = (int) std::round(p1[1]), yt = (int) std::round(p2[1]);
+    double xb = p0[0], xm = p1[0], xt = p2[0],
+            zb = p0[2], zm = p1[2], zt = p2[2];
 
-    float_mat dy0 = y2 - y0;
-    float_mat dy1 = y1 - y0;
+    int y = yb;
+    double x0 = xb, x1 = xb, z0 = zb, z1 = zb;
+    double dx0 = (xt - xb) / (yt - yb), dz0 = (zt - zb) / (yt - yb);
+    if (ym != yb) {
+        double dx1 = (xm - xb) / (ym - yb), dz1 = (zm - zb) / (ym - yb);
 
-    float_mat x0 = p0[0];
-    float_mat x1 = x0;
-
-    float_mat dx0 = (p2[0] - p0[0]) / dy0;
-    float_mat dx1 = (p1[0] - p0[0]) / dy1;
-
-    float_mat z0 = p0[2];
-    float_mat z1 = z0;
-
-    float_mat dz0 = (p2[2] - p0[2]) / dy0;
-    float_mat dz1 = (p1[2] - p0[2]) / dy1;
-
-//    printf("DRAWING\n");
-
-    for(int y = (int) std::round(y0); y < (int) std::round(y1); y++){
-        draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
-
-        x0 += dx0;
-        x1 += dx1;
-
-//        printf("(%f, %f)\n", x0, x1);
-//        printf("(%f, %f)\n", dx0, dx1);
-
-        z0 += dz0;
-        z1 += dz1;
+        for (; y < ym; y++) {
+            draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
+            x0 += dx0, x1 += dx1, z0 += dz0, z1 += dz1;
+        }
+    }
+    if (yt != ym) {
+        x1 = xm, z1 = zm;
+        double dx1 = (xt - xm) / (yt - ym), dz1 = (zt - zm) / (yt - ym);
+        for (; y < yt; y++) {
+            draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
+            x0 += dx0, x1 += dx1, z0 += dz0, z1 += dz1;
+        }
     }
 
-    x1 = p1[0];
 
-    dx0 = (p2[0] - p0[0])/(p2[1] - p0[1]);
-    dx1 = (p2[0] - p1[0])/(p2[1] - p1[1]);
 
-    z1 = p1[2];
-    dz1 = (p2[2] - p1[2]) / (p2[1]-p1[1]);
+//    float_mat y0 = p0[1];
+//    float_mat y1 = p1[1];
+//    float_mat y2 = p2[1];
+//
+//    float_mat dy0 = y2 - y0;
+//    float_mat dy1 = y1 - y0;
+//
+//    float_mat x0 = p0[0];
+//    float_mat x1 = x0;
+//
+//    float_mat dx0 = (p2[0] - p0[0]) / dy0;
+//    float_mat dx1 = (p1[0] - p0[0]) / dy1;
+//
+//    float_mat z0 = p0[2];
+//    float_mat z1 = z0;
+//
+//    float_mat dz0 = (p2[2] - p0[2]) / dy0;
+//    float_mat dz1 = (p1[2] - p0[2]) / dy1;
 
-    for(int y = (int) std::round(y1); y <= (int) std::round(y2); y++){
-        draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
-
-        x0 += dx0;
-        x1 += dx1;
-
-        z0 += dz0;
-        z1 += dz1;
-    }
+////    printf("DRAWING\n");
+//
+//    for(int y = (int) std::round(y0); y < (int) std::round(y1); y++){
+//        draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
+//
+//        x0 += dx0;
+//        x1 += dx1;
+//
+////        printf("(%f, %f)\n", x0, x1);
+////        printf("(%f, %f)\n", dx0, dx1);
+//
+//        z0 += dz0;
+//        z1 += dz1;
+//    }
+//
+//    x1 = p1[0];
+//
+//    dx0 = (p2[0] - p0[0])/(p2[1] - p0[1]);
+//    dx1 = (p2[0] - p1[0])/(p2[1] - p1[1]);
+//
+//    z1 = p1[2];
+//    dz1 = (p2[2] - p1[2]) / (p2[1]-p1[1]);
+//
+//    for(int y = (int) std::round(y1); y <= (int) std::round(y2); y++){
+//        draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
+//
+//        x0 += dx0;
+//        x1 += dx1;
+//
+//        z0 += dz0;
+//        z1 += dz1;
+//    }
 
 
 }
