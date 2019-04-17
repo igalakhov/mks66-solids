@@ -109,7 +109,7 @@ void Drawer::scan_line(float_mat * p0, float_mat * p1, float_mat * p2) {
     float_mat dz0 = (p2[2] - p0[2]) / dy0;
     float_mat dz1 = (p1[2] - p0[2]) / dy1;
 
-    printf("DRAWING\n");
+//    printf("DRAWING\n");
 
     for(int y = (int) std::round(y0); y < (int) std::round(y1); y++){
         draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
@@ -117,8 +117,8 @@ void Drawer::scan_line(float_mat * p0, float_mat * p1, float_mat * p2) {
         x0 += dx0;
         x1 += dx1;
 
-        printf("(%f, %f)\n", x0, x1);
-        printf("(%f, %f)\n", dx0, dx1);
+//        printf("(%f, %f)\n", x0, x1);
+//        printf("(%f, %f)\n", dx0, dx1);
 
         z0 += dz0;
         z1 += dz1;
