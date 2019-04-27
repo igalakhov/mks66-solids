@@ -64,10 +64,12 @@ void Display::display(){
 
 void Display::set(int x, int y, float_mat z, struct color * to_set){
 
+    //printf("%f\n", z);
+
     if(x < 0 or x > IMAGE_WIDTH - 1 or y < 0 or y > IMAGE_HEIGHT - 1)
         return;
 
-    if(z_buffer[y*IMAGE_HEIGHT + x] < z) {
+    if(z_buffer[y*IMAGE_HEIGHT + x] - z < 0.000001f) {
         unsigned char *cur = values + ((y * IMAGE_WIDTH) + x) * 3;
 
         // "efficiency"

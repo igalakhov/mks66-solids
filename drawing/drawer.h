@@ -27,6 +27,7 @@ public:
 
     void draw_line(int, int, float_mat, int, int, float_mat);
     void draw_line_new(int, int, float_mat, int, int, float_mat);
+    void draw_line_simon(double, double, double, double, double, double);
     void draw_line_steep(int, int, float_mat, int, int, float_mat, int, int, int);
     void draw_line_shallow(int, int, float_mat, int, int, float_mat, int, int, int);
     void scan_line(float_mat *, float_mat *, float_mat *);

@@ -75,6 +75,7 @@ void Drawer::draw_polygons(TriangleMatrix * m){
 void Drawer::scan_line(float_mat * p0, float_mat * p1, float_mat * p2) {
     // swap so they're in the right oder
 
+    // sort by y value
     if(p1[1] < p0[1])
         std::swap(p0, p1);
 
@@ -90,85 +91,59 @@ void Drawer::scan_line(float_mat * p0, float_mat * p1, float_mat * p2) {
     if(p1[1] == p2[1] and p1[0] > p2[0])
         std::swap(p1, p2);
 
-    int yb = (int) std::round(p0[1]), ym = (int) std::round(p1[1]), yt = (int) std::round(p2[1]);
-    double xb = p0[0], xm = p1[0], xt = p2[0],
-            zb = p0[2], zm = p1[2], zt = p2[2];
+    bool flip = false;
 
-    int y = yb;
-    double x0 = xb, x1 = xb, z0 = zb, z1 = zb;
-    double dx0 = (xt - xb) / (yt - yb), dz0 = (zt - zb) / (yt - yb);
-    if (ym != yb) {
-        double dx1 = (xm - xb) / (ym - yb), dz1 = (zm - zb) / (ym - yb);
+    float_mat x0 = p0[0];
+    float_mat z0 = p0[2];
+    float_mat x1 = x0;
+    float_mat z1 = z0;
+    int y = (int) std::round(p0[1]);
 
-        for (; y < ym; y++) {
-            draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
-            x0 += dx0, x1 += dx1, z0 += dz0, z1 += dz1;
-        }
+    float_mat d0 = (int) std::round(p2[1]) - y;
+    float_mat d1 = (int) std::round(p1[1]) - y;
+    float_mat d2 = (int) std::round(p2[1]) - (int) std::round(p1[1]);
+
+    float_mat dx0 = 0, dx1 = 0, dz0 = 0, dz1 = 0;
+
+    if(d0 != 0) {
+        dx0 = (p2[0] - p0[0]) / d0;
+        dz0 = (p2[2] - p0[2]) / d0;
     }
-    if (yt != ym) {
-        x1 = xm, z1 = zm;
-        double dx1 = (xt - xm) / (yt - ym), dz1 = (zt - zm) / (yt - ym);
-        for (; y < yt; y++) {
-            draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
-            x0 += dx0, x1 += dx1, z0 += dz0, z1 += dz1;
-        }
+    if(d1 != 0) {
+        dx1 = (p1[0] - p0[0])/d1;
+        dz1 = (p1[2] - p0[2])/d1;
     }
 
+    float_mat cur_z;
+    float_mat dz;
 
+    while(y <= (int) std::round(p2[1])){
+        cur_z = z0;
+        dz = (z0 - z1)/(x0 - x1);
 
-//    float_mat y0 = p0[1];
-//    float_mat y1 = p1[1];
-//    float_mat y2 = p2[1];
-//
-//    float_mat dy0 = y2 - y0;
-//    float_mat dy1 = y1 - y0;
-//
-//    float_mat x0 = p0[0];
-//    float_mat x1 = x0;
-//
-//    float_mat dx0 = (p2[0] - p0[0]) / dy0;
-//    float_mat dx1 = (p1[0] - p0[0]) / dy1;
-//
-//    float_mat z0 = p0[2];
-//    float_mat z1 = z0;
-//
-//    float_mat dz0 = (p2[2] - p0[2]) / dy0;
-//    float_mat dz1 = (p1[2] - p0[2]) / dy1;
+        draw_line_simon((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
 
-////    printf("DRAWING\n");
-//
-//    for(int y = (int) std::round(y0); y < (int) std::round(y1); y++){
-//        draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
-//
-//        x0 += dx0;
-//        x1 += dx1;
-//
-////        printf("(%f, %f)\n", x0, x1);
-////        printf("(%f, %f)\n", dx0, dx1);
-//
-//        z0 += dz0;
-//        z1 += dz1;
-//    }
-//
-//    x1 = p1[0];
-//
-//    dx0 = (p2[0] - p0[0])/(p2[1] - p0[1]);
-//    dx1 = (p2[0] - p1[0])/(p2[1] - p1[1]);
-//
-//    z1 = p1[2];
-//    dz1 = (p2[2] - p1[2]) / (p2[1]-p1[1]);
-//
-//    for(int y = (int) std::round(y1); y <= (int) std::round(y2); y++){
-//        draw_line_new((int) std::round(x0), y, z0, (int) std::round(x1), y, z1);
-//
-//        x0 += dx0;
-//        x1 += dx1;
-//
-//        z0 += dz0;
-//        z1 += dz1;
-//    }
+        x0 += dx0;
+        z0 += dz0;
+        x1 += dx1;
+        z1 += dz1;
+        y += 1;
 
+        if(!flip and y >= (int) std::round(p1[1])) {
+            flip = true;
 
+            dx1 = 0, dz1 = 0;
+
+            if(d2 != 0) {
+                dx1 = (p2[0] - p1[0]) / d2;
+                dz1 = (p2[2] - p1[2]) / d2;
+            }
+
+            x1 = p1[0];
+            z1 = p1[2];
+        }
+
+    }
 }
 
 // draw edges
@@ -177,7 +152,7 @@ void Drawer::draw_edges(EdgeMatrix * m){
     float_mat * start = m->start();
 
     while(max > 0){
-        draw_line((int) start[0], (int) start[1], start[2], (int) start[4], (int) start[5], start[6]);
+        draw_line_new((int) start[0], (int) start[1], start[2], (int) start[4], (int) start[5], start[6]);
 
         start += 8;
 
@@ -207,7 +182,7 @@ void Drawer::draw_line_shallow(int x1, int y1, float_mat z1, int x2, int y2, flo
     float_mat z = z1, dz = ((float_mat) (z2 - z1))/((float_mat) (x2 - x1));
 
     while(x <= x2){
-        set(x, y, std::round(z));
+        set(x, y, z);
 
         if(error > 0) {
             y += increment;
@@ -226,7 +201,7 @@ void Drawer::draw_line_steep(int x1, int y1, float_mat z1, int x2, int y2, float
     float_mat z = z1, dz = ((float_mat) (z2 - z1))/((float_mat) (y2 - y1));
 
     while(y <= y2){
-        set(x, y, std::round(z));
+        set(x, y, z);
 
 //        printf("(%d, %d, %f)\n", x, y, z);
 //        printf("(%d, %d, %f)\n", dx, dy, dz);
@@ -293,7 +268,7 @@ void Drawer::draw_line(int x1, int y1, float_mat z1, int x2, int y2, float_mat z
             dz = ((double) z2 - z1)/(x2 - x1);
 
             while(x <= x2){
-                set(x, y, z);
+                set((int) std::round(x), (int) std::round(y), z);
                 if(d > 0){
                     y++;
                     d += 2*b;
@@ -308,7 +283,7 @@ void Drawer::draw_line(int x1, int y1, float_mat z1, int x2, int y2, float_mat z
             dz = ((double) z2 - z1)/(y2 - y1);
 
             while(y <= y2){
-                set(x, y, 0);
+                set((int) std::round(x), (int) std::round(y), z);
                 if(d < 0){
                     x++;
                     d += 2*a;
@@ -323,7 +298,7 @@ void Drawer::draw_line(int x1, int y1, float_mat z1, int x2, int y2, float_mat z
             dz = ((double) z2 - z1)/(x2 - x1);
 
             while(x <= x2){
-                set(x, y, z);
+                set((int) std::round(x), (int) std::round(y), z);
                 if(d < 0){
                     y--;
                     d -= 2*b;
@@ -338,7 +313,7 @@ void Drawer::draw_line(int x1, int y1, float_mat z1, int x2, int y2, float_mat z
             dz = ((double) z2 - z1)/(y2 - y1);
 
             while(y >= y2){
-                set(x, y, z);
+                set((int) std::round(x), (int) std::round(y), z);
                 if(d > 0){
                     x++;
                     d += 2*a;
@@ -350,6 +325,90 @@ void Drawer::draw_line(int x1, int y1, float_mat z1, int x2, int y2, float_mat z
             break;
     }
 
+}
+
+void Drawer::draw_line_simon(double x0d, double y0d, double z0, double x1d, double y1d, double z1) {
+    int x0 = std::round(x0d), y0 = std::round(y0d), x1 = std::round(x1d), y1 = std::round(y1d);
+    int x, y, d, A, B;
+    double z, dz;
+    int dy_east, dy_northeast, dx_east, dx_northeast, d_east, d_northeast;
+    int loop_start, loop_end;
+
+    //swap points if going right -> left
+    if (x0 > x1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+        std::swap(z0, z1);
+    }
+
+    x = x0;
+    y = y0;
+    z = z0;
+    A = 2 * (y1 - y0);
+    B = -2 * (x1 - x0);
+    int wide = 0;
+    int tall = 0;
+    //octants 1 and 8
+    if (abs(x1 - x0) >= abs(y1 - y0)) { //octant 1/8
+        wide = 1;
+        loop_start = x;
+        loop_end = x1;
+        dx_east = dx_northeast = 1;
+        dy_east = 0;
+        d_east = A;
+        if (A > 0) { //octant 1
+            d = A + B / 2;
+            dy_northeast = 1;
+            d_northeast = A + B;
+        } else { //octant 8
+            d = A - B / 2;
+            dy_northeast = -1;
+            d_northeast = A - B;
+        }
+    }//end octant 1/8
+    else { //octant 2/7
+        tall = 1;
+        dx_east = 0;
+        dx_northeast = 1;
+        if (A > 0) {     //octant 2
+            d = A / 2 + B;
+            dy_east = dy_northeast = 1;
+            d_northeast = A + B;
+            d_east = B;
+            loop_start = y;
+            loop_end = y1;
+        } else {     //octant 7
+            d = A / 2 - B;
+            dy_east = dy_northeast = -1;
+            d_northeast = A - B;
+            d_east = -1 * B;
+            loop_start = y1;
+            loop_end = y;
+        }
+    }
+    dz = loop_end == loop_start ? 0 : (z1 - z0) / (loop_end - loop_start);
+
+
+    while (loop_start < loop_end) {
+
+        set(x, y, z);
+        if ((wide && ((A > 0 && d > 0) ||
+                      (A < 0 && d < 0)))
+            ||
+            (tall && ((A > 0 && d < 0) ||
+                      (A < 0 && d > 0)))) {
+            y += dy_northeast;
+            d += d_northeast;
+            x += dx_northeast;
+        } else {
+            x += dx_east;
+            y += dy_east;
+            d += d_east;
+        }
+        z += dz;
+        loop_start++;
+    } //end drawing loop
+    set(x, y, z);
 }
 
 void Drawer::set(int x, int y, float_mat z){
